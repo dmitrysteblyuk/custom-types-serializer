@@ -1,6 +1,29 @@
 {
   "name": "custom-types-serializer",
   "packageManager": "yarn@3.0.2",
+  "version": "0.0.0",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "author": "dmitrysteblyuk",
+  "repository": "https://github.com/dmitrysteblyuk/custom-types-serializer.git",
+  "license": "MIT",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "postinstall": "yarn add-pre-commit-hook",
+    "add-pre-commit-hook": "node -e \"fs.writeFileSync('.git/hooks/pre-commit', ['#!/bin/sh', 'yarn lint-staged', ''].join('\\\\n'), {mode: fs.constants.S_IRWXU})\"",
+    "build": "yarn build:clean && yarn build:main",
+    "build:clean": "rimraf lib",
+    "build:main": "tsc --project tsconfig.main.json",
+    "test": "yarn test:duplicate && yarn test:audit && yarn test:prettier && yarn test:types && yarn test:unit",
+    "test:duplicate": "yarn dedupe --check --strategy highest",
+    "test:audit": "bash -c \"yarn npm audit; [[ $? -ge 1 ]] && exit 1 || exit 0\"",
+    "test:prettier": "prettier --check .",
+    "test:types": "tsc --noEmit",
+    "test:unit": "jest",
+    "release:prepare": "yarn test && yarn build && npm pack --dry-run --json"
+  },
   "devDependencies": {
     "@jest/globals": "^27.1.0",
     "@semantic-release/changelog": "^5.0.1",
@@ -15,5 +38,40 @@
     "semantic-release": "^17.4.7",
     "ts-jest": "^27.0.5",
     "typescript": "^4.4.2"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testPathIgnorePatterns": [
+      "<rootDir>/lib/"
+    ],
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    }
+  },
+  "lint-staged": {
+    "*": [
+      "prettier --write"
+    ]
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "arrowParens": "always",
+    "trailingComma": "all",
+    "jsxSingleQuote": true,
+    "tabWidth": 2,
+    "bracketSpacing": false
+  },
+  "release": {
+    "repositoryUrl": "git@github.com:dmitrysteblyuk/custom-types-serializer.git",
+    "plugins": [
+      "@semantic-release/changelog",
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/git",
+      "@semantic-release/npm",
+      "@semantic-release/release-notes-generator"
+    ]
   }
 }

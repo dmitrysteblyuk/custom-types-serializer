@@ -2,19 +2,22 @@
   "name": "custom-types-serializer",
   "packageManager": "yarn@3.0.2",
   "description": "Serialize any custom javascript type or structure of any complexity.",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
   "types": "lib/cjs/index.d.ts",
   "author": "Dmitry Steblyuk",
   "repository": "https://github.com/dmitrysteblyuk/custom-types-serializer.git",
   "license": "MIT",
+  "keywords": [
+    "serialize",
+    "javascript"
+  ],
   "files": [
-    "lib",
-    "!lib/esm/**/*.d.ts"
+    "lib"
   ],
   "scripts": {
-    "postinstall": "yarn add-pre-commit-hook",
+    "prepare": "yarn add-pre-commit-hook",
     "add-pre-commit-hook": "node -e \"fs.writeFileSync('.git/hooks/pre-commit', ['#!/bin/sh', 'yarn lint-staged', ''].join('\\\\n'), {mode: fs.constants.S_IRWXU})\"",
     "build": "yarn build:clean && yarn build:cjs && yarn build:esm",
     "build:clean": "rimraf lib",

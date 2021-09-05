@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/dmitrysteblyuk/custom-types-serializer/compare/v1.0.1...v1.0.2) (2021-09-05)
+
+
+### Bug Fixes
+
+* fix semantic release ([d0fcbcc](https://github.com/dmitrysteblyuk/custom-types-serializer/commit/d0fcbcc3be18e304f38dd253740522a9f9d2274b))
+
 ## [1.0.1](https://github.com/dmitrysteblyuk/custom-types-serializer/compare/v1.0.0...v1.0.1) (2021-09-05)
 
 

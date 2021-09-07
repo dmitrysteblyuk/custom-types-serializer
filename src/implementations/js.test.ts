@@ -1,6 +1,6 @@
 import {describe, it, expect} from '@jest/globals';
-import {createReplacer, createReviver} from './core';
-import {jsSerializer} from './js-serializer-impl';
+import {jsReplacer} from './js-replacer';
+import {jsReviver} from './js-reviver';
 
 describe('jsSerializer', () => {
   it('serializes most js types', () => {
@@ -24,10 +24,10 @@ describe('jsSerializer', () => {
       error: new ReferenceError('Something went wrong.'),
       symbol: Symbol('my-symbol'),
     };
-    const serialized = JSON.stringify(value, createReplacer(jsSerializer));
+    const serialized = JSON.stringify(value, jsReplacer.getCallback());
     const {error, symbol, nones, ...deserialized}: typeof value = JSON.parse(
       serialized,
-      createReviver(jsSerializer),
+      jsReviver.getCallback(),
     );
 
     expect(deserialized).toStrictEqual(comparable);
@@ -36,5 +36,30 @@ describe('jsSerializer', () => {
     expect(typeof symbol).toBe('symbol');
     expect(symbol.description).toBe('my-symbol');
     expect(nones).toStrictEqual([null, ,]);
+  });
+
+  it('should work for the example from Readme', () => {
+    const data = {
+      error: new Error('Something went wrong.'),
+      symbol: Symbol('test'),
+      set: new Set([
+        new Date(1234567890),
+        undefined,
+        NaN,
+        -0,
+        123n,
+        /^(?=abc).*$/g,
+      ]),
+    };
+    const serialized = JSON.stringify(data, jsReplacer.getCallback());
+    const deserialized: typeof data = JSON.parse(
+      serialized,
+      jsReviver.getCallback(),
+    );
+
+    expect(([...deserialized.set.values()][0] as Date).getTime()).toBe(
+      1234567890,
+    );
+    expect(deserialized.set).toStrictEqual(data.set);
   });
 });

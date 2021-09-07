@@ -1,5 +1,7 @@
-export * from './core';
+export * from './implementations';
+export * from './core-module';
+export * from './core-default';
 export * from './types';
-export {Serializer, TypedSerializerConfig} from './serializer';
-export * from './serializers-impl';
-export * from './js-serializer-impl';
+export * from './custom-type';
+export {Replacer} from './replacer';
+export {Reviver} from './reviver';

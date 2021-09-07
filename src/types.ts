@@ -1,28 +1,23 @@
-export type JsonCallback = (
-  this: Parent,
-  key: string,
-  value: unknown,
-) => unknown;
-
-export type Parent = Readonly<Record<string, unknown>>;
-export type Context = Readonly<{
-  parent: Parent;
+export type WrapWithType = (type: string, value: unknown) => unknown;
+export type ReplacerContext = Readonly<{
+  parentObject: object;
   key: string;
+  original: unknown;
 }>;
+export type ReviverContext = Readonly<{parentObject: object; key: string}>;
 
-export type ReplacerCallback = (value: unknown, context: Context) => unknown;
+export type ReplacerCallback = (
+  value: unknown,
+  typed: WrapWithType,
+  context: ReplacerContext,
+) => unknown;
 export type ReviverCallback = (
   value: unknown,
   type: string | null,
-  context: Context,
+  context: ReviverContext,
 ) => unknown;
 
-export type ReplacerMiddleware = (next: ReplacerCallback) => ReplacerCallback;
-export type ReviverMiddleware = (next: ReviverCallback) => ReviverCallback;
-
-export type SerializerReplacer = Readonly<{
-  getReplacerCallback: ReplacerMiddleware;
-}>;
-export type SerializerReviver = Readonly<{
-  getReviverCallback: ReviverMiddleware;
-}>;
+export type ReviverContextWithState<S> = Readonly<ReviverContext & {state: S}>;
+export type ReplacerContextWithState<S> = Readonly<
+  ReplacerContext & {state: S}
+>;

@@ -10,8 +10,13 @@
   "repository": "https://github.com/dmitrysteblyuk/custom-types-serializer.git",
   "license": "MIT",
   "keywords": [
-    "serialize",
-    "javascript"
+    "serializer",
+    "deserializer",
+    "reviver",
+    "replacer",
+    "json",
+    "circular",
+    "references"
   ],
   "files": [
     "lib"
@@ -31,7 +36,6 @@
     "test:unit": "jest",
     "release:prepare": "yarn test && yarn build && npm pack --dry-run --json"
   },
-  "dependencies": {},
   "devDependencies": {
     "@jest/globals": "^27.1.0",
     "@semantic-release/changelog": "^5.0.1",
@@ -41,6 +45,7 @@
     "@semantic-release/release-notes-generator": "^9.0.3",
     "jest": "^27.1.0",
     "lint-staged": "^11.1.2",
+    "moment": "^2.29.1",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
     "semantic-release": "^17.4.7",
@@ -78,7 +83,7 @@
           "bracketSpacing": true,
           "trailingComma": "es5",
           "singleQuote": false,
-          "printWidth": 100
+          "printWidth": 200
         }
       }
     ]

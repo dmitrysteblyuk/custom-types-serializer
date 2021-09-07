@@ -1,129 +1,107 @@
 # Custom Types Serializer
 
-[![npm](https://img.shields.io/npm/v/custom-types-serializer/latest.svg)](https://www.npmjs.com/package/custom-types-serializer)
-[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+[![npm](https://img.shields.io/npm/v/custom-types-serializer/latest.svg)](https://www.npmjs.com/package/custom-types-serializer) [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
-Enables you to serialize any custom javascript type or structure of any complexity.
+Serialization made finally easy. This library enables you to:
 
-Comes with a pre-built `jsSerializer` for most common javascript types.
+1. Write custom serialization plugins for any javascript classes, objects or functions.
+2. Combine plugins together so that objects containing values of different types can be serialized.
+3. Split serialization/deserialization to separate files (reduces bundle size in some cases).
+4. Serialize most common javascript types with built-in plugins.
+5. Preserve javascript references (including circular) with a built-in plugin.
 
-Provides `Serializer.create()` and `Serializer.combine()` for implementing and reusing your own serializer plugins.
+This library takes advantage of replacer/reviver callbacks provived by [JSON.stringify()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters) and [JSON.parse()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse#parameters) respectively.
 
-### Installation
+## Installation
 
 ```bash
 yarn add custom-types-serializer
 ```
 
-<b>3Kb</b> minified.
-
 Playground - https://codesandbox.io/s/custom-types-serializer-z6onp
 
-### Simple Usage
+## Usage
+
+### Serialize Javascript
+
+Serialize most common javascript types with built-in `jsReplacer`/`jsReviver`.
 
 ```javascript
-import { jsSerializer, createReplacer, createReviver } from "custom-types-serializer";
+import { jsReplacer, jsReviver } from "custom-types-serializer";
 
-const object = {
+const data = {
   error: new Error("Something went wrong."),
   symbol: Symbol("test"),
-  set: new Set([new Date(12345), undefined, NaN, -0, 123n, /^(?=abc).*$/g]),
+  set: new Set([new Date(1234567890), undefined, NaN, -0, 123n, /^(?=abc).*$/g]),
 };
-const serialized = JSON.stringify(object, createReplacer(jsSerializer));
-const deserialized = JSON.parse(serialized, createReviver(jsSerializer));
+const serialized = JSON.stringify(data, jsReplacer.getCallback());
+const deserialized = JSON.parse(serialized, jsReviver.getCallback());
 
-[...deserialized.set.values()][0].getTime(); // <- 12345
+[...deserialized.set.values()][0].getTime(); // 1234567890
 ```
 
-### Advanced Usage
+### Serialize Custom Types
 
-Create your own serializable custom types with `customType()`.
+Write your own serialization plugins with `customType()`.
 
 ```javascript
 import moment from "moment";
-import { customType, createReviver, createReplacer } from "custom-types-serializer";
+import { customType } from "custom-types-serializer";
 
-const data = { date: moment("2018-06-27 17:30") };
-const serialized = JSON.stringify(
-  data,
-  createReplacer((value, { parent, key }) => {
-    // Use `parent[key]` to access the original value, because moment implements `.toJSON()`.
-    if (moment.isMoment(parent[key])) {
-      return customType("Moment", value);
-    }
-    return value;
-  })
+const momentType = customType("Moment");
+const momentReplacer = momentType.createReplacer(
+  // Use `original` value because moment implements `.toJSON()`.
+  (_value, { original }) => moment.isMoment(original),
+  String
 );
-const deserialized = JSON.parse(
-  serialized,
-  createReviver((value, type) => {
-    if (type === "Moment") {
-      return moment(value);
-    }
-    return value;
-  })
-);
+const momentReviver = momentType.createReviver((isoString) => moment(isoString));
 
-deserialized.date.format("MMMM Do YYYY, h:mm:ss a"); // <- "June 27th 2018, 5:30:00 pm"
+const data = {
+  date: moment("2018-06-26 17:30"),
+};
+const serialized = JSON.stringify(data, momentReplacer.getCallback());
+const deserialized = JSON.parse(serialized, momentReviver.getCallback());
+
+deserialized.date.format("MMMM Do YYYY, h:mm:ss a"); // "June 26th 2018, 5:30:00 pm"
 ```
 
-### Using `.toJSON()`
+### Combine Plugins
+
+Use `Replacer.combine(...replacers)` and `Reviver.combine(...revivers)` to combine plugins.
+
+Use `referenceReplacer`, `referenceReviver` to preserve references.
 
 ```javascript
-import { customType, createReviver } from "custom-types-serializer";
+import { Replacer, Reviver, mapReplacer, mapReviver, referenceReplacer, referenceReviver } from "custom-types-serializer";
 
-class MyClass {
-  subClasses = [new MySubClass(), new MySubClass()];
-  toJSON() {
-    return customType("MyClass", { subClasses: this.subClasses });
-  }
-}
-class MySubClass {
-  state = { randomValue: Math.random() };
-  getValue() {
-    return this.state.randomValue;
-  }
-  toJSON() {
-    return customType("MySubClass", { state: this.state });
-  }
-}
+const myReplacer = Replacer.combine(referenceReplacer, mapReplacer);
+const myReviver = Reviver.combine(referenceReviver, mapReviver);
 
-const instance = new MyClass();
-const serialized = JSON.stringify(instance);
-const deserialized = JSON.parse(
-  serialized,
-  createReviver((value, type) => {
-    if (type === "MySubClass") {
-      const mySubClass = new MySubClass();
-      mySubClass.state = value.state; // hydrate MySubClass instance
-      return mySubClass;
-    }
-    if (type === "MyClass") {
-      const myClass = new MyClass();
-      myClass.subClasses = value.subClasses; // hydrate MyClass instance
-      return myClass;
-    }
-    return value;
-  })
-);
+const data = new Map();
+const circular = { data };
+data.set("a", circular);
+data.set("b", circular);
 
-deserialized.subClasses[1].getValue() === instance.subClasses[1].getValue(); // <- true
+const serialized = JSON.stringify(data, myReplacer.getCallback());
+const deserialized = JSON.parse(serialized, myReviver.getCallback());
+
+deserialized.get("a").data === deserialized; // true
+deserialized.get("a") === deserialized.get("b"); // true
 ```
 
-### Pluggable Serializers
-
-Use `Serializer.create` and `Serializer.combine` to create and combine custom serializers.
+### Serialize Functions
 
 ```javascript
-import { Serializer, createReplacer, createReviver, jsSerializer } from "custom-types-serializer";
+import { customType } from "custom-types-serializer";
 
 const registeredFunctions = [];
-const functionSerializer = Serializer.create(
-  "Function", // give unique id
-  (x) => typeof x === "function", // check
-  (fn) => registeredFunctions.push(fn) - 1, // replace with serializable
-  (id) => registeredFunctions[id] // revive
+
+const functionType = customType("Function");
+const functionReplacer = functionType.createReplacer(
+  (x) => typeof x === "function",
+  (fn) => registeredFunctions.push(fn) - 1
 );
+const functionReviver = functionType.createReviver((id) => registeredFunctions[id]);
 
 const serialized = JSON.stringify(
   {
@@ -131,12 +109,9 @@ const serialized = JSON.stringify(
       return "okay";
     },
   },
-  createReplacer(functionSerializer)
+  functionReplacer.getCallback()
 );
-const deserialized = JSON.parse(serialized, createReviver(functionSerializer));
+const deserialized = JSON.parse(serialized, functionReviver.getCallback());
 
-deserialized.doSmth(); // <- "okay"
-
-export const mySerializer = Serializer.combine(jsSerializer, functionSerializer);
-// Use `mySerializer` to serialize most js types and functions.
+deserialized.doSmth(); // "okay"
 ```

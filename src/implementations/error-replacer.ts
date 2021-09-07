@@ -1,8 +1,6 @@
-import {Serializer} from '../serializer';
+import {errorType} from './types';
 
-export const errorSerializer = Serializer.create(
-  'Error',
+export const errorReplacer = errorType.createReplacer(
   (x): x is Error => Object.prototype.toString.call(x) === '[object Error]',
   ({message, stack = message}) => stack,
-  Error,
 );

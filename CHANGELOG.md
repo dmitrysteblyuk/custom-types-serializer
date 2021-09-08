@@ -1,3 +1,15 @@
+# [2.0.0-beta.1](https://github.com/dmitrysteblyuk/custom-types-serializer/compare/v1.0.2...v2.0.0-beta.1) (2021-09-08)
+
+
+### Features
+
+* **refactoring:** split Serializer to Replacer and Reviver, introduce customType() ([d2ab745](https://github.com/dmitrysteblyuk/custom-types-serializer/commit/d2ab74582af6b975c872390bd3e5c0a81bcca707))
+
+
+### BREAKING CHANGES
+
+* **refactoring:** remove Serializer
+
 ## [1.0.2](https://github.com/dmitrysteblyuk/custom-types-serializer/compare/v1.0.1...v1.0.2) (2021-09-05)
 
 

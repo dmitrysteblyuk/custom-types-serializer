@@ -1,14 +1,14 @@
 import {describe, it, expect} from '@jest/globals';
-import {Replacer} from '../replacer';
-import {Reviver} from '../reviver';
-import {referenceReplacer} from './reference-replacer';
-import {referenceReviver} from './reference-reviver';
-import {dateReplacer} from './date-replacer';
-import {dateReviver} from './date-reviver';
-import {mapReplacer} from './map-replacer';
-import {mapReviver} from './map-reviver';
+import {Serializer} from '../serializer';
+import {Deserializer} from '../deserializer';
+import {referenceSerializer} from './reference-serializer';
+import {referenceDeserializer} from './reference-deserializer';
+import {dateSerializer} from './date-serializer';
+import {dateDeserializer} from './date-deserializer';
+import {mapSerializer} from './map-serializer';
+import {mapDeserializer} from './map-deserializer';
 
-describe('referenceReplacer/referenceReviver', () => {
+describe('referenceSerializer/referenceDeserializer', () => {
   it('serializes references', () => {
     const date = new Date(123);
     const value = {
@@ -21,11 +21,14 @@ describe('referenceReplacer/referenceReviver', () => {
 
     const serialized = JSON.stringify(
       value,
-      Replacer.combine(referenceReplacer, dateReplacer).getCallback(),
+      Serializer.combine(referenceSerializer, dateSerializer).getReplacer(),
     );
     const deserialized: typeof value = JSON.parse(
       serialized,
-      Reviver.combine(referenceReviver, dateReviver).getCallback(),
+      Deserializer.combine(
+        referenceDeserializer,
+        dateDeserializer,
+      ).getReviver(),
     );
     expect(deserialized).toStrictEqual(value);
     expect(deserialized).not.toBe(value);
@@ -38,16 +41,19 @@ describe('referenceReplacer/referenceReviver', () => {
   });
 
   it('should work for the example from Readme', () => {
-    const myReplacer = Replacer.combine(referenceReplacer, mapReplacer);
-    const myReviver = Reviver.combine(referenceReviver, mapReviver);
+    const mySerializer = Serializer.combine(referenceSerializer, mapSerializer);
+    const myDeserializer = Deserializer.combine(
+      referenceDeserializer,
+      mapDeserializer,
+    );
 
     const data = new Map();
     const circular = {data};
     data.set('a', circular);
     data.set('b', circular);
 
-    const serialized = JSON.stringify(data, myReplacer.getCallback());
-    const deserialized = JSON.parse(serialized, myReviver.getCallback());
+    const serialized = JSON.stringify(data, mySerializer.getReplacer());
+    const deserialized = JSON.parse(serialized, myDeserializer.getReviver());
 
     expect(deserialized.get('a').data).toBe(deserialized);
     expect(deserialized.get('a')).toBe(deserialized.get('b'));

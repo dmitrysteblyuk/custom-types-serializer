@@ -1,6 +1,9 @@
-import {TypedReplacer} from './replacer';
-import {TypedReviver} from './reviver';
-import type {ReplacerContextWithState, ReviverContextWithState} from './types';
+import {TypedSerializer} from './serializer';
+import {TypedDeserializer} from './deserializer';
+import type {
+  DeserializerContextWithState,
+  SerializerContextWithState,
+} from './types';
 import {assertIsNonEmptyString} from './utils';
 
 export function customType<T>(id: string) {
@@ -21,31 +24,34 @@ class CustomType<T> {
     assertIsNonEmptyString(id, 'Custom type new id');
     this.#id = id;
   }
-  createReplacer<V, S = undefined>(
+  createSerializer<V, S = undefined>(
     check:
-      | ((value: unknown, context: ReplacerContextWithState<S>) => value is V)
-      | ((value: unknown, context: ReplacerContextWithState<S>) => boolean),
-    replace: (value: V, context: ReplacerContextWithState<S>) => T,
+      | ((
+          value: unknown,
+          context: DeserializerContextWithState<S>,
+        ) => value is V)
+      | ((value: unknown, context: DeserializerContextWithState<S>) => boolean),
+    replace: (value: V, context: DeserializerContextWithState<S>) => T,
     createState?: () => S,
   ) {
-    return new TypedReplacer<V, T>(this, (next) => {
+    return new TypedSerializer<V, T>(this, (next) => {
       const state = createState?.()!;
 
       return (value, typed, context) => {
-        const replacerContext = {...context, state};
+        const contextWithState = {...context, state};
 
-        if (check(value, replacerContext)) {
-          return typed(this.#id, replace(value, replacerContext));
+        if (check(value, contextWithState)) {
+          return typed(this.#id, replace(value, contextWithState));
         }
         return next(value, typed, context);
       };
     });
   }
-  createReviver<V, S = undefined>(
-    revive: (value: T, context: ReviverContextWithState<S>) => V,
+  createDeserializer<V, S = undefined>(
+    revive: (value: T, context: SerializerContextWithState<S>) => V,
     createState?: () => S,
   ) {
-    return new TypedReviver<T, V>(this, (next) => {
+    return new TypedDeserializer<T, V>(this, (next) => {
       const state = createState?.()!;
 
       return (value, typeId, context) => {

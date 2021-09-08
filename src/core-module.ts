@@ -1,4 +1,8 @@
-import type {ReplacerCallback, ReviverCallback, WrapWithType} from './types';
+import type {
+  SerializerCallback,
+  DeserializerCallback,
+  WrapWithType,
+} from './types';
 import {assertIsNonEmptyString} from './utils';
 
 export abstract class AbstractCoreModule<T> {
@@ -9,7 +13,7 @@ export abstract class AbstractCoreModule<T> {
   abstract isCustomType(value: unknown): value is T;
   abstract getCustomTypeAndValue(value: T): {type: string; value: unknown};
 
-  createReplacerCallback(callback: ReplacerCallback) {
+  createReplacer(callback: SerializerCallback) {
     const typed = this.#wrapWithType;
     const self = this;
 
@@ -23,7 +27,7 @@ export abstract class AbstractCoreModule<T> {
     };
   }
 
-  createReviverCallback(callback: ReviverCallback) {
+  createReviver(callback: DeserializerCallback) {
     const self = this;
     return function (this: object, key: string, json: unknown) {
       if (self.isCustomType(this)) {

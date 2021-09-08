@@ -1,5 +1,5 @@
 import {customType} from '../custom-type';
-import type {Reference} from './reference-replacer';
+import type {Reference} from './reference-serializer';
 
 export const bigintType = customType<string>('BigInt');
 export const dateType = customType<string>('Date');

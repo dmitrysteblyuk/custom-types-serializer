@@ -1,6 +1,6 @@
 import {describe, it, expect} from '@jest/globals';
-import {jsReplacer} from './js-replacer';
-import {jsReviver} from './js-reviver';
+import {jsSerializer} from './js-serializer';
+import {jsDeserializer} from './js-deserializer';
 
 describe('jsSerializer', () => {
   it('serializes most js types', () => {
@@ -24,10 +24,10 @@ describe('jsSerializer', () => {
       error: new ReferenceError('Something went wrong.'),
       symbol: Symbol('my-symbol'),
     };
-    const serialized = JSON.stringify(value, jsReplacer.getCallback());
+    const serialized = JSON.stringify(value, jsSerializer.getReplacer());
     const {error, symbol, nones, ...deserialized}: typeof value = JSON.parse(
       serialized,
-      jsReviver.getCallback(),
+      jsDeserializer.getReviver(),
     );
 
     expect(deserialized).toStrictEqual(comparable);
@@ -51,10 +51,10 @@ describe('jsSerializer', () => {
         /^(?=abc).*$/g,
       ]),
     };
-    const serialized = JSON.stringify(data, jsReplacer.getCallback());
+    const serialized = JSON.stringify(data, jsSerializer.getReplacer());
     const deserialized: typeof data = JSON.parse(
       serialized,
-      jsReviver.getCallback(),
+      jsDeserializer.getReviver(),
     );
 
     expect(([...deserialized.set.values()][0] as Date).getTime()).toBe(

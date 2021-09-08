@@ -1,23 +1,25 @@
 export type WrapWithType = (type: string, value: unknown) => unknown;
-export type ReplacerContext = Readonly<{
+export type DeserializerContext = Readonly<{
   parentObject: object;
   key: string;
   original: unknown;
 }>;
-export type ReviverContext = Readonly<{parentObject: object; key: string}>;
+export type SerializerContext = Readonly<{parentObject: object; key: string}>;
 
-export type ReplacerCallback = (
+export type SerializerCallback = (
   value: unknown,
   typed: WrapWithType,
-  context: ReplacerContext,
+  context: DeserializerContext,
 ) => unknown;
-export type ReviverCallback = (
+export type DeserializerCallback = (
   value: unknown,
   type: string | null,
-  context: ReviverContext,
+  context: SerializerContext,
 ) => unknown;
 
-export type ReviverContextWithState<S> = Readonly<ReviverContext & {state: S}>;
-export type ReplacerContextWithState<S> = Readonly<
-  ReplacerContext & {state: S}
+export type SerializerContextWithState<S> = Readonly<
+  SerializerContext & {state: S}
+>;
+export type DeserializerContextWithState<S> = Readonly<
+  DeserializerContext & {state: S}
 >;

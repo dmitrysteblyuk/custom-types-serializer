@@ -17,7 +17,7 @@ describe('customType()', () => {
   });
 });
 
-describe('createReplacerCallback()/createReviverCallback()', () => {
+describe('.createReplacer()/.createReviver()', () => {
   it('should serialize any custom type', () => {
     const value = {
       date: new Date(1234567890),
@@ -39,7 +39,7 @@ describe('createReplacerCallback()/createReviverCallback()', () => {
 
     const serialized = JSON.stringify(
       value,
-      defaultCoreModule.createReplacerCallback((value, typed, {original}) => {
+      defaultCoreModule.createReplacer((value, typed, {original}) => {
         if (original instanceof Date) {
           return typed('Date', value as string);
         }
@@ -60,7 +60,7 @@ describe('createReplacerCallback()/createReviverCallback()', () => {
     );
     const deserialzed = JSON.parse(
       serialized,
-      defaultCoreModule.createReviverCallback((value: any, type) => {
+      defaultCoreModule.createReviver((value: any, type) => {
         if (type === 'Date') {
           return new Date(value);
         }
@@ -86,7 +86,7 @@ describe('createReplacerCallback()/createReviverCallback()', () => {
     const callCount = [0, 0];
     const serialized = JSON.stringify(
       Symbol('my-symbol'),
-      defaultCoreModule.createReplacerCallback((value, typed) => {
+      defaultCoreModule.createReplacer((value, typed) => {
         callCount[0]++;
         if (typeof value === 'symbol') {
           const {description = null} = value;
@@ -97,7 +97,7 @@ describe('createReplacerCallback()/createReviverCallback()', () => {
     );
     const deserialzed: symbol = JSON.parse(
       serialized,
-      defaultCoreModule.createReviverCallback((value: any, type) => {
+      defaultCoreModule.createReviver((value: any, type) => {
         callCount[1]++;
         if (type === 'Symbol') {
           return Symbol(value ?? undefined);

@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/dmitrysteblyuk/custom-types-serializer/compare/v2.0.0...v3.0.0) (2021-09-08)
+
+
+### Code Refactoring
+
+* rename Replacer to Serializer and Reviver to Deserializer ([f42021d](https://github.com/dmitrysteblyuk/custom-types-serializer/commit/f42021dc3990ebd48a1440ce13b0e6e9f62d3c9e))
+
+
+### BREAKING CHANGES
+
+* most apis are renamed
+
 # [2.0.0](https://github.com/dmitrysteblyuk/custom-types-serializer/compare/v1.0.2...v2.0.0) (2021-09-08)
 
 

@@ -2,7 +2,7 @@
   "name": "custom-types-serializer",
   "packageManager": "yarn@3.0.2",
   "description": "Serialize any custom javascript type or structure of any complexity.",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
   "types": "lib/cjs/index.d.ts",

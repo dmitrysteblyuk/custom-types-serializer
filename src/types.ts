@@ -12,7 +12,7 @@ export type SerializerCallback = (
   context: DeserializerContext,
 ) => unknown;
 export type DeserializerCallback = (
-  value: unknown,
+  value: any,
   type: string | null,
   context: SerializerContext,
 ) => unknown;
